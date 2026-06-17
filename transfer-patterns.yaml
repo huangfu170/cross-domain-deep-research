@@ -1,0 +1,126 @@
+patterns:
+  # @pattern id=evaluation-to-training keywords=evaluation training reward rubric checklist judge criteria preference rlvr llm-as-judge
+  - id: evaluation-to-training
+    transfer: "evaluation -> training: turn evaluation criteria into training supervision or reward signals"
+    use_when:
+      - "The target domain lacks binary correctness labels."
+      - "Benchmarks or expert evaluations already contain structured criteria."
+      - "Preference rewards are noisy, expensive, or biased by superficial artifacts."
+    queries:
+      - "\"{target_domain}\" rubric evaluation"
+      - "\"{target_domain}\" evaluation criteria reward"
+      - "\"{target_domain}\" benchmark rubric training"
+      - "\"{target_domain}\" checklist training signal"
+    apply:
+      - "Collect or synthesize instance-specific evaluation criteria."
+      - "Convert each criterion into a checkable item with an importance weight."
+      - "Score model outputs against the criteria with a judge, verifier, or rule."
+      - "Aggregate criterion scores into a scalar reward or filtering signal."
+    risks:
+      - "Rubric items may encode benchmark artifacts instead of robust task quality."
+      - "Judge model bias can become an optimization target."
+      - "Generic rubrics may miss instance-specific failure modes."
+
+  # @pattern id=benchmark-to-reward keywords=benchmark reward metric leaderboard scoring test-case reward-shaping objective
+  - id: benchmark-to-reward
+    transfer: "benchmark -> reward: convert benchmark scoring logic into dense or decomposed reward signals"
+    use_when:
+      - "A benchmark exists but training uses weaker proxy labels."
+      - "The benchmark metric decomposes into sub-scores or test cases."
+      - "The target system needs feedback more granular than final accuracy."
+    queries:
+      - "\"{target_domain}\" benchmark metric reward"
+      - "\"{target_domain}\" leaderboard scoring training objective"
+      - "\"{target_domain}\" reward shaping benchmark"
+    apply:
+      - "Decompose the benchmark metric into checkable sub-metrics."
+      - "Identify which sub-metrics can be computed during training or tuning."
+      - "Normalize sub-metrics into comparable reward components."
+      - "Train, filter, or rerank with the composed reward."
+    risks:
+      - "Optimizing benchmark metrics can overfit leaderboard quirks."
+      - "Some benchmark metrics are too sparse or expensive for training-time use."
+
+  # @pattern id=annotation-rubric-to-optimization-signal keywords=annotation rubric guideline labeling data-quality preference filtering loss-weighting optimization
+  - id: annotation-rubric-to-optimization-signal
+    transfer: "annotation rubric -> optimization signal: turn annotation guidelines into model-improvement signals"
+    use_when:
+      - "Human annotation guidelines are richer than the final labels."
+      - "Dataset quality issues or label ambiguity limit performance."
+      - "The target task needs controllable quality dimensions."
+    queries:
+      - "\"{target_domain}\" annotation guideline training"
+      - "\"{target_domain}\" labeling rubric optimization"
+      - "\"{target_domain}\" data quality taxonomy"
+      - "\"{target_domain}\" annotation criteria data filtering"
+    apply:
+      - "Extract criteria from annotation guidelines."
+      - "Map criteria to measurable quality tags or judge prompts."
+      - "Score examples or outputs against the criteria."
+      - "Use scores for filtering, weighting, or pair construction."
+    risks:
+      - "Guidelines may be written for annotators, not optimized for model learning."
+      - "Criteria may be difficult to automate reliably."
+
+  # @pattern id=diagnostic-tool-to-data-selection keywords=diagnostic error-analysis failure-taxonomy data-selection hard-example-mining active-learning uncertainty augmentation
+  - id: diagnostic-tool-to-data-selection
+    transfer: "diagnostic tool -> data selection: use diagnostic signals to select, weight, or synthesize useful data"
+    use_when:
+      - "Failures are clustered but training data is sampled uniformly."
+      - "There is an error taxonomy or diagnostic tool."
+      - "A small amount of targeted data may fix a recurring failure mode."
+    queries:
+      - "\"{target_domain}\" error analysis hard example mining"
+      - "\"{target_domain}\" failure taxonomy training data"
+      - "\"{target_domain}\" active learning uncertainty"
+      - "\"{target_domain}\" targeted data augmentation"
+    apply:
+      - "Define diagnostic labels for recurring failures."
+      - "Score existing examples or outputs with the diagnostic tool."
+      - "Prioritize examples with high diagnostic value."
+      - "Retrain, fine-tune, or evaluate with the targeted subset."
+    risks:
+      - "Over-focusing on known failures may reduce generalization."
+      - "Diagnostics can be noisy or incomplete."
+
+  # @pattern id=failure-analysis-to-curriculum keywords=failure-analysis curriculum difficulty-buckets staged-training progressive-benchmark capability-ordering
+  - id: failure-analysis-to-curriculum
+    transfer: "failure analysis -> curriculum: convert failure modes into staged training or evaluation"
+    use_when:
+      - "Failure modes have a natural difficulty ordering."
+      - "Training collapses or overfits when all cases are mixed."
+      - "A staged intervention can isolate which capability is missing."
+    queries:
+      - "\"{target_domain}\" failure analysis curriculum"
+      - "\"{target_domain}\" curriculum learning"
+      - "\"{target_domain}\" difficulty buckets"
+      - "\"{target_domain}\" staged training"
+    apply:
+      - "Cluster failures into capability categories."
+      - "Order categories by prerequisite relationship or empirical difficulty."
+      - "Train or evaluate progressively across categories."
+      - "Measure whether earlier-stage mastery improves later-stage performance."
+    risks:
+      - "Incorrect difficulty ordering can hurt learning."
+      - "Curriculum gains may disappear under full-distribution evaluation."
+
+  # @pattern id=confidence-score-to-routing-control keywords=confidence uncertainty calibration routing control fallback verifier adaptive-compute abstain expert-routing
+  - id: confidence-score-to-routing-control
+    transfer: "confidence score -> routing/control signal: use uncertainty to trigger routing, fallback, or adaptive compute"
+    use_when:
+      - "The target system wastes compute on easy cases or fails silently on hard cases."
+      - "Confidence or uncertainty scores are available or can be estimated."
+      - "There are multiple solvers, tools, models, or verification paths."
+    queries:
+      - "\"{target_domain}\" confidence routing"
+      - "\"{target_domain}\" uncertainty fallback"
+      - "\"{target_domain}\" adaptive compute"
+      - "\"{target_domain}\" calibration router"
+    apply:
+      - "Estimate confidence or uncertainty for each input or output."
+      - "Calibrate the score against observed errors."
+      - "Define routing thresholds or a learned router."
+      - "Compare accuracy/cost tradeoffs against a static baseline."
+    risks:
+      - "Uncalibrated confidence can route the hardest cases incorrectly."
+      - "Routing overhead may erase efficiency gains."

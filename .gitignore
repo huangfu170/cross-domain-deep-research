@@ -1,0 +1,7 @@
+# Ignore all top-level folders except the exported skills.
+/*/
+!/discover-cross-domain-opportunities-en/
+!/discover-cross-domain-opportunities-zh/
+!/discover-transfer-patterns-from-pdf-en/
+!/discover-transfer-patterns-from-pdf-zh/
+!/scripts/
