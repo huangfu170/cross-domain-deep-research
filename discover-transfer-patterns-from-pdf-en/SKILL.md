@@ -1,6 +1,6 @@
 ---
 name: discover-transfer-patterns-from-pdf-en
-description: Discover new reusable transfer patterns from a user-provided academic PDF that are not yet recorded in transfer-patterns.yaml. Use when Codex or Claude Code needs to read a paper, identify the paper's core idea-generation mechanism, compare it against the existing transfer-pattern library, and propose deduplicated YAML pattern additions using the compact fields id, transfer, use_when, queries, apply, and risks. Do not add patterns that are merely paper-specific methods unless they generalize across domains or roles.
+description: Discover reusable transfer patterns from a user-provided academic PDF that are not yet recorded in transfer-patterns.yaml. Use when Codex or Claude Code needs to read a paper, identify the role-transfer mechanism behind its core idea, compare it with the existing pattern library, and propose deduplicated YAML additions using the compact fields id, transfer, use_when, queries, apply, and risks. Do not add paper-specific methods unless they generalize across domains or system roles.
 ---
 
 # Discover Transfer Patterns From PDF
@@ -9,12 +9,12 @@ description: Discover new reusable transfer patterns from a user-provided academ
 
 `/discover-transfer-patterns-from-pdf-en <pdf_path>`
 
-Use this skill to mine reusable idea-discovery patterns from a paper. The output should help maintain `transfer-patterns.yaml`, not summarize the paper.
+Use this skill to mine reusable idea-discovery patterns from a paper. The output should help maintain `transfer-patterns.yaml`; it should not be a general paper summary.
 
 ## Inputs
 
 - A user-provided PDF path.
-- Existing pattern library path. Default: `transfer-patterns.yaml` in the current repository root.
+- Existing pattern-library path. Default: `transfer-patterns.yaml` in the current repository root.
 - Optional target domain if the user provides one.
 
 ## Workflow
@@ -25,20 +25,20 @@ Use this skill to mine reusable idea-discovery patterns from a paper. The output
 2. Extract text from the PDF. If text extraction is poor, render key pages or inspect visually.
 3. Do not read all of `transfer-patterns.yaml` directly. First generate 5-12 search keywords from the paper title, abstract, contribution description, and candidate `transfer` terms.
 4. Prefer `python scripts/select_patterns.py transfer-patterns.yaml <keyword1> <keyword2> ... --max 5` to select matching blocks. If the script is unavailable, use `rg -n -i "<keyword1>|<keyword2>|..." transfer-patterns.yaml` or PowerShell `Select-String` to search the `# @pattern` index lines.
-5. Each index line uses `# @pattern id=<id> keywords=<keywords>`. Only read matched pattern blocks, starting at the matched `# @pattern` line and stopping before the next `# @pattern` line.
+5. Each index line uses `# @pattern id=<id> keywords=<keywords>`. Read only the matched pattern blocks, starting at the matched `# @pattern` line and stopping before the next `# @pattern` line.
 6. If nothing matches, use `python scripts/select_patterns.py transfer-patterns.yaml --index` or grep to read at most all `# @pattern` index lines for coarse screening, not the full bodies; then choose the most likely 1-5 pattern blocks from the index keywords.
 7. If no pattern library exists, continue with an empty pattern list and report that no baseline library was loaded.
 8. For loaded candidate blocks, record existing pattern `id`, `transfer`, `use_when`, `queries`, `apply`, and `risks`.
 
 ### Phase 1: Extract the Paper's Idea Mechanism
 
-Identify the paper's central contribution as a role transfer or reusable mechanism. Prefer mechanisms such as:
+Identify the paper's central contribution as a role transfer or reusable mechanism. Look especially for cases where:
 
-- a signal used in one role being reused in another role
-- an evaluation artifact becoming an optimization signal
-- a diagnostic tool becoming data selection or curriculum
-- a benchmark, annotation, verifier, simulator, or constraint being repurposed
-- a workflow component being moved from offline analysis into training, inference, routing, or control
+- a signal used in one role is reused in another role
+- an evaluation artifact becomes an optimization signal
+- a diagnostic tool becomes a data-selection or curriculum mechanism
+- a benchmark, annotation, verifier, simulator, or constraint is repurposed
+- a workflow component moves from offline analysis into training, inference, routing, or control
 
 For each candidate mechanism, extract:
 
@@ -53,7 +53,7 @@ paper_mechanism:
   why_it_is_reusable: "<why this can apply beyond this paper>"
 ```
 
-Do not treat every method detail as a pattern. A pattern must be reusable across multiple domains or system components.
+Do not treat every method detail as a pattern. A pattern should be reusable across domains, tasks, or system components.
 
 ### Phase 2: Compare Against Existing YAML Patterns
 
@@ -68,7 +68,7 @@ For each candidate mechanism, compare it to existing patterns using:
 Classify each candidate:
 
 - `already_recorded`: clearly covered by an existing pattern.
-- `variant_of_existing`: useful specialization of an existing pattern; suggest extending the existing pattern instead of adding a new one.
+- `variant_of_existing`: useful specialization of an existing pattern; suggest extending the existing pattern instead of adding a new entry.
 - `new_pattern`: not covered and reusable enough to add.
 - `paper_specific_only`: interesting but too narrow for the pattern library.
 
@@ -102,7 +102,7 @@ extend_existing_pattern:
 
 ### Phase 4: Validation Rules
 
-Only recommend adding a new YAML pattern if all are true:
+Recommend a new YAML pattern only when all of the following are true:
 
 - The mechanism is more general than the paper's specific algorithm.
 - The `transfer` string clearly states a source role and target role.
@@ -110,7 +110,7 @@ Only recommend adding a new YAML pattern if all are true:
 - The pattern has at least one concrete `apply` step.
 - It is not already covered by `transfer-patterns.yaml`.
 
-When uncertain, mark as `variant_of_existing` or `paper_specific_only` rather than adding a new pattern.
+When uncertain, mark the candidate as `variant_of_existing` or `paper_specific_only` rather than forcing a new pattern.
 
 ## Output
 

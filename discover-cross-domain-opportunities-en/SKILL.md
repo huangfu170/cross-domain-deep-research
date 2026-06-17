@@ -1,6 +1,6 @@
 ---
 name: discover-cross-domain-opportunities-en
-description: End-to-end cross-domain research opportunity discovery from academic papers. Use when Codex or Claude Code needs to find paper-backed open problems, identify unresolved causes, search for methods from other domains that may transfer, run novelty checks, design concrete application plans, review feasibility, and produce a report with research hypotheses and minimal experiments. This is the single user-facing entry point; do not ask the user to run separate planning, extraction, transfer, or reporting skills.
+description: End-to-end cross-domain research opportunity discovery from academic papers. Use when Codex or Claude Code needs to identify paper-backed open problems, explain why they remain unsolved, search for transferable methods from other domains, run novelty checks, design concrete application plans, assess feasibility, and produce a report with research hypotheses and minimal experiments. This is the English user-facing entry point; do not ask the user to run separate planning, extraction, transfer, or reporting skills.
 ---
 
 # Discover Cross Domain Opportunities
@@ -9,17 +9,17 @@ description: End-to-end cross-domain research opportunity discovery from academi
 
 `/discover-cross-domain-opportunities-en <target_domain>`
 
-Use this skill as the only public entry point for cross-domain idea discovery. Internally execute all phases below. Do not ask the user to choose or manually chain sub-workflows.
+Use this skill as the English entry point for cross-domain idea discovery. Run all phases internally; do not ask the user to choose or manually chain sub-workflows.
 
 ## Goal
 
-Find verifiable research opportunities rather than a generic literature review:
+Find verifiable, actionable research opportunities rather than writing a generic literature review:
 
 - Extract open problems from target-domain papers, especially limitations, future work, open challenges, benchmark gaps, negative results, and deployment constraints.
 - Explain why existing methods still fail.
 - Abstract each problem into a cross-domain mechanism.
-- Search for methods that work in other domains but are not directly applied to the target domain.
-- Run novelty checks for direct applications and mechanism-equivalent methods.
+- Search for methods that work in other domains but have not been directly applied to the target domain.
+- Check for direct applications and mechanism-equivalent methods.
 - Produce concrete application plans, research hypotheses, minimal experiments, feasibility reviews, and a final report.
 
 ## Workflow
@@ -33,18 +33,18 @@ Get the current year-month before searching:
 
 Record it as `{current_year_month}` in `outline.yaml`, JSON outputs, and `report.md`.
 
-Also dynamically load the transfer-pattern library by search, without putting the full YAML file into context:
+Load the transfer-pattern library by search so the full YAML file does not enter the context:
 
 1. If the user provides a pattern-library path, read that YAML first.
 2. Otherwise read `transfer-patterns.yaml` from the current repository root.
 3. Do not read the whole pattern library directly. First extract 5-12 search keywords from the current gap's `problem_statement`, `why_unsolved`, `failure_modes`, `evaluation_gap`, `candidate_source_domains`, and target-domain terms.
 4. Prefer `python scripts/select_patterns.py transfer-patterns.yaml <keyword1> <keyword2> ... --max 5` to select matching blocks. If the script is unavailable, use `rg -n -i "<keyword1>|<keyword2>|..." transfer-patterns.yaml` or PowerShell `Select-String` to search only the `# @pattern` index lines.
-5. Each index line uses `# @pattern id=<id> keywords=<keywords>`. Only read matched YAML blocks, starting at the matched `# @pattern` line and stopping before the next `# @pattern` line.
+5. Each index line uses `# @pattern id=<id> keywords=<keywords>`. Read only the matched YAML blocks, starting at the matched `# @pattern` line and stopping before the next `# @pattern` line.
 6. If nothing matches, use `python scripts/select_patterns.py transfer-patterns.yaml --index` or grep to read at most all `# @pattern` index lines, not the full pattern bodies; then choose the most likely 1-3 blocks from the index keywords.
 7. If multiple pattern libraries exist, merge matched blocks and deduplicate by `id`.
 8. If no pattern library exists, continue the task but mention in the report that no dynamic transfer-pattern library was loaded.
 
-Each pattern only needs `id`, `transfer`, `use_when`, `queries`, `apply`, and `risks`. Patterns are heuristic seeds for transfer hypotheses, not final conclusions.
+Each pattern only needs `id`, `transfer`, `use_when`, `queries`, `apply`, and `risks`. Treat patterns as heuristic seeds for transfer hypotheses, not as final conclusions.
 
 ### Phase 1: Create Project Outline
 
@@ -120,7 +120,7 @@ execution:
 
 ### Phase 2: Extract Paper-Backed Gaps
 
-For each `research_question`, create `{output_dir}/{rq_slug}.json`. Skip existing files to support resume.
+For each `research_question`, create `{output_dir}/{rq_slug}.json`. Skip existing files so the workflow can resume cleanly.
 
 Required evidence rules:
 
@@ -258,7 +258,7 @@ Each candidate method must include:
 
 ### Phase 4: Review Feasibility
 
-For every `candidate_gap`, add `feasibility_review`:
+For every `candidate_gap`, add a `feasibility_review`:
 
 ```json
 {
@@ -274,8 +274,8 @@ For every `candidate_gap`, add `feasibility_review`:
 Use:
 
 - `go`: dependencies are available, minimum experiment is clear, metrics are credible.
-- `revise`: direction is useful but scope, data, baseline, or evaluation must be adjusted.
-- `hold`: key dependency is unavailable or no minimal experiment can test the hypothesis.
+- `revise`: the direction is promising, but the scope, data, baseline, or evaluation needs adjustment.
+- `hold`: a key dependency is unavailable, or no minimal experiment can test the hypothesis.
 
 ### Phase 5: Write Final Report
 
