@@ -1,5 +1,7 @@
 # cross-domain-deep-research
 
+Language: [中文](#中文) | [English](#english)
+
 ## 中文
 
 本项目为 Claude Code 或 Codex 提供跨领域 idea 发现 skill。仓库根目录下直接提供两份 skill：
