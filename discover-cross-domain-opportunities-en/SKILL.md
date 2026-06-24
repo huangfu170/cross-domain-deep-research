@@ -116,7 +116,7 @@ execution:
 - target-domain attempts: `current_attempts`, `failure_modes`, `evaluation_gap`
 - transfer search: `problem_abstraction`, `external_method`, `source_domain`, `not_yet_applied_evidence`, `possible_existing_equivalent`, `novelty_check`
 - application design: `application_plan`, `target_component`, `mechanism_mapping`, `implementation_steps`, `required_signals_or_data`, `baseline_to_modify`, `success_metrics`
-- validation: `hypothesis`, `minimal_experiment`, `engineering_difficulty`, `data_difficulty`, `dataset_or_benchmark`, `risk_or_limitation`, `evidence_level`, `feasibility_review`
+- validation: `hypothesis`, `minimal_experiment`, `engineering_difficulty`, `data_difficulty`, `dataset_or_benchmark`, `risk_or_limitation`, `evidence_level`, `feasibility_review`, `top_conference_innovation_review`
 
 ### Phase 2: Extract Paper-Backed Gaps
 
@@ -256,7 +256,7 @@ Each candidate method must include:
 }
 ```
 
-### Phase 4: Review Feasibility
+### Phase 4: Review Feasibility and Top-Tier Conference Novelty
 
 For every `candidate_gap`, add a `feasibility_review`:
 
@@ -267,15 +267,45 @@ For every `candidate_gap`, add a `feasibility_review`:
   "blocking_dependencies": ["dependency"],
   "validation_risks": ["risk"],
   "fallback_plan": "smaller or offline fallback",
+  "top_conference_innovation_review": {
+    "target_venues": ["the most relevant 2-4 venues among CVPR/ICCV/ECCV/NeurIPS/ICML/ICLR/ACL/EMNLP/KDD/SIGIR/WWW/AAAI/IJCAI"],
+    "nearest_prior_work": [
+      {
+        "paper": "closest target-domain or source-domain paper",
+        "venue_year": "venue/year",
+        "overlap": "what overlaps with the candidate idea",
+        "remaining_delta": "what substantive difference remains versus this prior work"
+      }
+    ],
+    "claimed_paper_contribution": "one-sentence main contribution if submitted to a top-tier CS conference",
+    "innovation_type": "new_problem/new_method/new_benchmark/new_theory/new_system_or_dataset_with_methodological_insight",
+    "is_more_than_engineering_integration": true,
+    "top_conference_bar": "strong/medium/weak",
+    "why_meets_or_misses_bar": "whether it satisfies top-tier conference novelty expectations; explicitly discuss the delta, non-triviality, generality, and experimental persuasiveness",
+    "must_validate_for_publication": [
+      "clear difference from nearest prior work",
+      "a non-trivial method or mechanism, not merely stitching existing modules into the target domain",
+      "strong baselines, ablations, generalization tests, or failure analysis that would satisfy top-tier reviewers",
+      "transfer value across multiple datasets/tasks/scenarios, or a high-quality benchmark/data construction mechanism"
+    ]
+  },
   "review_verdict": "go/revise/hold"
 }
 ```
 
 Use:
 
-- `go`: dependencies are available, minimum experiment is clear, metrics are credible.
-- `revise`: the direction is promising, but the scope, data, baseline, or evaluation needs adjustment.
-- `hold`: a key dependency is unavailable, or no minimal experiment can test the hypothesis.
+- `go`: dependencies are available, the minimum experiment is clear, metrics are credible, and `top_conference_bar` is at least `medium`; the report must explain why the idea could satisfy top-tier computer-science conference novelty expectations.
+- `revise`: the direction is promising, but top-tier novelty evidence is insufficient, nearest-prior-work overlap is too high, the contribution claim is unclear, or the scope/data/baseline/evaluation/ablation/generalization design needs adjustment.
+- `hold`: a key dependency is unavailable, no minimal experiment can test the core hypothesis, or the idea appears to be engineering integration/routine application that is unlikely to satisfy top-tier computer-science conference novelty requirements.
+
+Top-tier novelty review rules:
+
+- The focus of feasibility review is not merely "can it be implemented"; it is "can the minimum experiment validate that this direction has top-tier CS conference-level novelty." Candidates that are implementable but weak as papers must be marked `revise` or `hold`.
+- Explicitly list 2-5 nearest prior works and explain substantive differences. If the delta is only changing the dataset, backbone, prompt, adding a routine module, or simple system integration, do not mark it `go`.
+- Provide a one-sentence paper contribution that a reviewer could understand. If the non-trivial contribution cannot be stated in one sentence, mark it `revise`.
+- Design experiments that validate novelty, not only performance gains; prefer strong baselines, ablations, cross-dataset/domain generalization, failure-mode analysis, cost/robustness analysis, and statistical significance.
+- If the candidate is mainly a benchmark or dataset, explain why the data construction mechanism, annotation quality control, task definition, and evaluation protocol are themselves research contributions, not just more data collection.
 
 ### Phase 5: Write Final Report
 
@@ -292,7 +322,7 @@ Generated month: {current_year_month}
 ## 4. Transferable Cross-Domain Methods
 ## 5. Evidence of Not-Yet-Applied Methods
 ## 6. Search Coverage and Missed-Risk Analysis
-## 7. Feasibility Review
+## 7. Feasibility and Top-Tier Novelty Review
 ## 8. Ranked Research Hypotheses
 ## 9. Minimal Experiments
 ## 10. Risks, Counterexamples, and Exclusions
@@ -309,7 +339,7 @@ For each opportunity, include:
 - application plan
 - novelty check result
 - possible equivalent methods
-- feasibility review
+- feasibility and top-tier novelty review
 - minimal experiment
 - engineering and data difficulty
 - expected contribution

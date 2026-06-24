@@ -116,7 +116,7 @@ execution:
 - 目标领域已有尝试：`current_attempts`、`failure_modes`、`evaluation_gap`
 - 跨领域检索：`problem_abstraction`、`external_method`、`source_domain`、`not_yet_applied_evidence`、`possible_existing_equivalent`、`novelty_check`
 - 应用方案：`application_plan`、`target_component`、`mechanism_mapping`、`implementation_steps`、`required_signals_or_data`、`baseline_to_modify`、`success_metrics`
-- 验证设计：`hypothesis`、`minimal_experiment`、`engineering_difficulty`、`data_difficulty`、`dataset_or_benchmark`、`risk_or_limitation`、`evidence_level`、`feasibility_review`
+- 验证设计：`hypothesis`、`minimal_experiment`、`engineering_difficulty`、`data_difficulty`、`dataset_or_benchmark`、`risk_or_limitation`、`evidence_level`、`feasibility_review`、`top_conference_innovation_review`
 
 ### 阶段 2：抽取有论文证据的问题缺口
 
@@ -256,7 +256,7 @@ novelty check 查询必须包含：
 }
 ```
 
-### 阶段 4：可行性评估
+### 阶段 4：可行性与顶会创新性评估
 
 为每个 `candidate_gap` 添加 `feasibility_review`：
 
@@ -267,19 +267,53 @@ novelty check 查询必须包含：
   "blocking_dependencies": ["阻塞依赖"],
   "validation_risks": ["验证风险"],
   "fallback_plan": "更小或离线的降级验证方案",
+  "top_conference_innovation_review": {
+    "target_venues": ["CVPR/ICCV/ECCV/NeurIPS/ICML/ICLR/ACL/EMNLP/KDD/SIGIR/WWW/AAAI/IJCAI 中最相关的 2-4 个"],
+    "nearest_prior_work": [
+      {
+        "paper": "最接近的目标领域或源领域论文",
+        "venue_year": "会议/年份",
+        "overlap": "与候选方案重合之处",
+        "remaining_delta": "候选方案相比该论文还剩什么实质差异"
+      }
+    ],
+    "claimed_paper_contribution": "若投稿顶级计算机会议，论文主贡献应如何一句话表述",
+    "innovation_type": "new_problem/new_method/new_benchmark/new_theory/new_system_or_dataset_with_methodological_insight",
+    "is_more_than_engineering_integration": true,
+    "top_conference_bar": "strong/medium/weak",
+    "why_meets_or_misses_bar": "是否满足顶会论文创新性要求；必须明确说明差距、非平凡性、通用性和实验说服力",
+    "must_validate_for_publication": [
+      "与最近邻工作的清晰差异",
+      "非平凡方法或机制，而不只是把已有模块拼接到目标领域",
+      "能支撑顶会审稿的强 baseline、ablation、泛化或失败分析",
+      "对多个数据集/任务/场景有可迁移价值，或提出高质量 benchmark/数据构造机制"
+    ]
+  },
   "review_verdict": "go/revise/hold"
 }
 ```
 
 判断标准：
 
-- `go`：依赖可获得，最小实验清楚，指标可信。
-- `revise`：方向有价值，但需要缩小范围、替换数据、调整 baseline 或重新设计评估。
-- `hold`：关键依赖不可获得，或当前没有能验证核心假设的最小实验。
+- `go`：依赖可获得，最小实验清楚，指标可信，且 `top_conference_bar` 至少为 `medium`；需要能解释为什么该方案可能满足顶级计算机会议论文的创新性要求。
+- `revise`：方向有价值，但顶会创新性证据不足、最近邻工作重合过高、贡献表述不清，或需要缩小范围、替换数据、调整 baseline、补充 ablation/泛化实验、重新设计评估。
+- `hold`：关键依赖不可获得，当前没有能验证核心假设的最小实验，或判断为只属于工程集成/常规应用，难以满足顶级计算机会议论文发表的创新性要求。
+
+顶会创新性评估规则：
+
+- 可行性评估的重点不是“能否实现”，而是“最小实验能否验证该方向具有顶级计算机会议论文级别的创新性”。工程可做但论文创新性弱的候选必须标记为 `revise` 或 `hold`。
+- 必须显式列出 2-5 篇最近邻 prior work，并说明候选方案和它们的实质差异。若差异只是换数据集、换 backbone、换 prompt、增加常规模块或简单系统拼接，不要判为 `go`。
+- 必须给出可被审稿人接受的论文主贡献句。如果无法用一句话说明非平凡贡献，应标记为 `revise`。
+- 必须设计能验证创新性的实验，而不只是验证性能提升；优先包括强 baseline、消融实验、泛化到不同数据集/领域、失败模式分析、成本/鲁棒性分析和统计显著性。
+- 如果候选方向主要是 benchmark 或 dataset，必须说明数据构造机制、标注质量控制、任务定义和 evaluation protocol 为什么本身具有研究贡献，而不仅是收集更多数据。
 
 ### 阶段 5：生成最终报告
 
 生成 `{target_domain}/report.md`：
+
+报告语言和术语限制：
+
+- 报告中的专有名词、方法名、指标名、数据集名、benchmark 名称、模型名、算法名和论文简称首次出现时，必须写成 `English term(中文释义)` 的形式，例如 `Rubrics as Rewards(作为奖励的评分规程)`、`HealthBench(健康评测基准)`；若没有自然中文释义，括号内给出简短中文解释。后续可使用英文原词或英文简称。
 
 ```text
 # {topic} 研究机会报告
@@ -292,7 +326,7 @@ novelty check 查询必须包含：
 ## 4. 可迁移的跨领域方法
 ## 5. 尚未应用证据
 ## 6. 搜索覆盖与遗漏风险
-## 7. 可行性 Review
+## 7. 可行性与顶会创新性 Review
 ## 8. 研究假设排序
 ## 9. 最小实验
 ## 10. 风险、反例与排除项
@@ -309,7 +343,7 @@ novelty check 查询必须包含：
 - 应用方案
 - novelty check 结果
 - 可能的等价方法
-- 可行性 review
+- 可行性与顶会创新性 review
 - 最小实验
 - 工程和数据难度
 - 预期贡献
